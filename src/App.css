@@ -139,7 +139,7 @@ body {
 .route-card {
   display: grid;
   gap: 7px;
-  min-height: 96px;
+  min-height: 88px;
   padding: 14px;
   color: #27364c;
   text-align: left;
@@ -212,17 +212,57 @@ body {
   padding: 18px;
 }
 
-.workspace-header {
-  display: flex;
+.primary-action-panel {
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) minmax(220px, 320px);
   align-items: center;
-  justify-content: space-between;
-  gap: 14px;
+  gap: 18px;
+  padding-bottom: 16px;
+  border-bottom: 1px solid #e1e7f0;
 }
 
-.workspace-header p {
-  margin-bottom: 5px;
+.route-context {
+  display: grid;
+  gap: 6px;
+}
+
+.route-context .eyebrow {
+  margin-bottom: 0;
+}
+
+.route-context p:not(.eyebrow) {
   color: #687487;
+  line-height: 1.5;
+}
+
+.route-context span {
+  color: #4e5b6e;
   font-size: 13px;
+  font-weight: 700;
+}
+
+.primary-action-controls {
+  display: grid;
+  justify-items: stretch;
+  gap: 8px;
+}
+
+.primary-action-button {
+  min-height: 48px;
+  font-size: 15px;
+}
+
+.blocked-reason {
+  color: #8a2636;
+  font-size: 13px;
+  font-weight: 750;
+  line-height: 1.4;
+}
+
+.preview-notice {
+  color: #677386;
+  font-size: 13px;
+  line-height: 1.45;
 }
 
 .workspace-section {
@@ -359,19 +399,64 @@ body {
     padding: 18px;
   }
 
-  .topbar,
-  .workspace-header,
-  .workspace-actions {
+  .topbar {
     align-items: stretch;
     flex-direction: column;
   }
 
-  .wizard-layout,
+  .wizard-layout {
+    display: flex;
+    flex-direction: column;
+  }
+
   .wizard-stepper {
+    grid-template-columns: repeat(6, minmax(54px, 1fr));
+    overflow-x: auto;
+  }
+
+  .step-item {
+    min-height: 54px;
+    padding: 8px 4px;
+  }
+
+  .step-item span {
+    width: 22px;
+    height: 22px;
+  }
+
+  .primary-action-panel {
     grid-template-columns: 1fr;
+  }
+
+  .wizard-main {
+    order: 1;
+  }
+
+  .route-selector {
+    order: 2;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+  }
+
+  .route-card {
+    min-height: 74px;
+    padding: 12px;
+  }
+
+  .route-card span {
+    font-size: 12px;
   }
 
   .route-selector {
     position: static;
+  }
+
+  .safety-panel {
+    order: 3;
+  }
+}
+
+@media (max-width: 460px) {
+  .route-selector {
+    grid-template-columns: 1fr;
   }
 }

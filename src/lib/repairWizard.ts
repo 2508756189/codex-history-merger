@@ -65,29 +65,39 @@ export type RepairWizardState = {
   run: RepairRun | null
 }
 
+export type WizardPrimaryAction = {
+  label: string
+  disabled: boolean
+  disabledReason?: string
+  tone: 'primary' | 'blocked' | 'complete'
+  previewNotice: string
+}
+
+export const wizardPreviewNotice = '当前为交互预览，未扫描真实 Codex 文件。'
+
 export const repairRoutes: RepairRoute[] = [
   {
     id: 'hidden-history',
-    title: '隐藏历史',
-    description: '线程存在于磁盘中，但没有出现在 Codex Desktop 里。',
+    title: '找回隐藏历史',
+    description: '历史线程还在磁盘上，但没有显示在 Codex Desktop。',
     primaryInputLabel: '线程标题或项目路径',
   },
   {
     id: 'provider-migration',
-    title: 'Provider 迁移',
-    description: '在持久 Provider key 和 rollout 元数据之间迁移历史。',
+    title: '修复 Provider 迁移',
+    description: '修正数据库和 rollout 元数据里的 Provider 分组不一致。',
     primaryInputLabel: '源 Provider key 和目标 Provider key',
   },
   {
     id: 'project-sidebar',
-    title: '缺失项目侧栏',
-    description: '项目已存在于配置中，但没有出现在 Desktop 侧栏。',
+    title: '恢复项目侧栏',
+    description: '项目配置存在，但没有出现在 Codex Desktop 侧栏。',
     primaryInputLabel: '项目根路径',
   },
   {
     id: 'backup-import',
-    title: '备份历史导入',
-    description: '扫描外部 .codex 根目录，去重、导入并准备写回。',
+    title: '导入备份历史',
+    description: '扫描外部 .codex 目录，去重后导入到本地合并库。',
     primaryInputLabel: '外部 .codex 路径',
   },
 ]
@@ -274,4 +284,44 @@ export function canExecutePlan(plan: RepairPlan | null, environment: { codexDesk
   if (!plan) return false
   if (plan.riskLevel === 'requires-desktop-closed' && !environment.codexDesktopClosed) return false
   return true
+}
+
+export function getWizardPrimaryAction(state: RepairWizardState, canExecute: boolean): WizardPrimaryAction {
+  if (state.run) {
+    return {
+      label: '预览执行已完成',
+      disabled: true,
+      tone: 'complete',
+      previewNotice: wizardPreviewNotice,
+    }
+  }
+
+  if (!state.diagnosis) {
+    return {
+      label: '开始预览诊断',
+      disabled: false,
+      tone: 'primary',
+      previewNotice: wizardPreviewNotice,
+    }
+  }
+
+  if (!state.plan) {
+    return {
+      label: '生成预览计划',
+      disabled: false,
+      tone: 'primary',
+      previewNotice: wizardPreviewNotice,
+    }
+  }
+
+  const disabledReason =
+    state.plan.riskLevel === 'requires-desktop-closed' && !canExecute ? '需要先关闭 Codex Desktop' : undefined
+
+  return {
+    label: '运行预览执行',
+    disabled: !canExecute,
+    disabledReason,
+    tone: disabledReason ? 'blocked' : 'primary',
+    previewNotice: wizardPreviewNotice,
+  }
 }

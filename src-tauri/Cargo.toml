@@ -1,6 +1,6 @@
 [package]
 name = "codex-history-merger"
-version = "0.1.0"
+version = "0.1.1"
 description = "A local Codex history merger"
 authors = ["Codex"]
 edition = "2021"

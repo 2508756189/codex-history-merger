@@ -4,6 +4,7 @@ import {
   buildMockRepairPlan,
   canExecutePlan,
   createInitialWizardState,
+  getWizardPrimaryAction,
   repairRoutes,
   repairSteps,
   selectRoute,
@@ -162,5 +163,45 @@ describe('mock repair route actions', () => {
     expect(plan.preconditions).toContain('写入 .codex-global-state.json 前请关闭 Codex Desktop')
     expect(canExecutePlan(plan, { codexDesktopClosed: false })).toBe(false)
     expect(canExecutePlan(plan, { codexDesktopClosed: true })).toBe(true)
+  })
+})
+
+describe('wizard primary action', () => {
+  it('starts with a preview diagnosis action', () => {
+    const action = getWizardPrimaryAction(createInitialWizardState(), false)
+
+    expect(action.label).toBe('开始预览诊断')
+    expect(action.disabled).toBe(false)
+    expect(action.previewNotice).toBe('当前为交互预览，未扫描真实 Codex 文件。')
+  })
+
+  it('moves from diagnosis to preview plan generation', () => {
+    const initial = createInitialWizardState()
+    const diagnosis = buildMockDiagnosis(initial.activeRouteId)
+    const action = getWizardPrimaryAction({ ...initial, diagnosis, activeStepId: 'cause' }, false)
+
+    expect(action.label).toBe('生成预览计划')
+    expect(action.disabled).toBe(false)
+  })
+
+  it('explains why execution is blocked when Codex Desktop must be closed', () => {
+    const initial = createInitialWizardState()
+    const diagnosis = buildMockDiagnosis('hidden-history')
+    const plan = buildMockRepairPlan(diagnosis)
+    const action = getWizardPrimaryAction({ ...initial, diagnosis, plan, activeStepId: 'plan', riskLevel: plan.riskLevel }, false)
+
+    expect(action.label).toBe('运行预览执行')
+    expect(action.disabled).toBe(true)
+    expect(action.disabledReason).toBe('需要先关闭 Codex Desktop')
+  })
+
+  it('allows preview execution for plans without desktop-close preconditions', () => {
+    const initial = createInitialWizardState()
+    const diagnosis = buildMockDiagnosis('backup-import')
+    const plan = buildMockRepairPlan(diagnosis)
+    const action = getWizardPrimaryAction({ ...initial, activeRouteId: 'backup-import', diagnosis, plan, activeStepId: 'plan', riskLevel: plan.riskLevel }, true)
+
+    expect(action.label).toBe('运行预览执行')
+    expect(action.disabled).toBe(false)
   })
 })

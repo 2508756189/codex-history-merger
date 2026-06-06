@@ -9,6 +9,7 @@ import {
   buildMockRepairPlan,
   canExecutePlan,
   createInitialWizardState,
+  getWizardPrimaryAction,
   repairRoutes,
   repairSteps,
   selectRoute,
@@ -22,6 +23,7 @@ function App() {
     [state.activeRouteId],
   )
   const canExecute = canExecutePlan(state.plan, { codexDesktopClosed: false })
+  const primaryAction = getWizardPrimaryAction(state, canExecute)
 
   function handleRouteSelect(routeId: RepairRouteId) {
     setState((current) => selectRoute(current, routeId))
@@ -67,18 +69,34 @@ function App() {
       return {
         ...current,
         activeStepId: 'verify',
-          run: {
-            id: 'run-preview',
-            planId: plan.id,
-            status: 'completed',
-            backupLocation: 'repairs/run-preview',
-            events: ['已创建备份快照', '已应用计划变更', '已运行验证检查'],
-            changedFiles: plan.writeSet,
-            verificationResults: plan.verificationItems.map((item) => `已验证：${item}`),
-            rollbackStatus: 'available',
-          },
+        run: {
+          id: 'run-preview',
+          planId: plan.id,
+          status: 'completed',
+          backupLocation: 'repairs/run-preview',
+          events: ['已创建备份快照', '已应用计划变更', '已运行验证检查'],
+          changedFiles: plan.writeSet,
+          verificationResults: plan.verificationItems.map((item) => `已验证：${item}`),
+          rollbackStatus: 'available',
+        },
       }
     })
+  }
+
+  function handlePrimaryAction() {
+    if (!state.diagnosis) {
+      handleDiagnose()
+      return
+    }
+
+    if (!state.plan) {
+      handlePlan()
+      return
+    }
+
+    if (canExecute) {
+      handleExecute()
+    }
   }
 
   return (
@@ -99,21 +117,9 @@ function App() {
             diagnosis={state.diagnosis}
             plan={state.plan}
             run={state.run}
-            canExecute={canExecute}
-            onDiagnose={handleDiagnose}
-            onPlan={handlePlan}
-            onExecute={handleExecute}
+            primaryAction={primaryAction}
+            onPrimaryAction={handlePrimaryAction}
           />
-          {state.plan && state.plan.preconditions.length > 0 && (
-            <section className="workspace-section" aria-label="执行前置条件">
-              <h3>执行前置条件</h3>
-              <ul>
-                {state.plan.preconditions.map((item) => (
-                  <li key={item}>{item}</li>
-                ))}
-              </ul>
-            </section>
-          )}
         </div>
         <SafetyPanel riskLevel={state.riskLevel} plan={state.plan} run={state.run} />
       </section>
