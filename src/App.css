@@ -241,6 +241,56 @@ body {
   font-weight: 700;
 }
 
+.route-input-field {
+  display: grid;
+  gap: 6px;
+  margin-top: 4px;
+}
+
+.route-input-field input {
+  padding: 9px 11px;
+  border: 1px solid #cdd6e4;
+  border-radius: 8px;
+  font-size: 14px;
+  color: #2b3445;
+  background: #ffffff;
+}
+
+.route-input-field input:focus {
+  outline: none;
+  border-color: #4f7df4;
+  box-shadow: 0 0 0 3px rgba(79, 125, 244, 0.18);
+}
+
+.desktop-closed-toggle {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  padding: 9px 11px;
+  border: 1px solid #e3c98a;
+  border-radius: 8px;
+  background: #fdf6e3;
+  color: #6b5418;
+  font-size: 13px;
+  font-weight: 700;
+}
+
+.desktop-closed-toggle input {
+  width: 16px;
+  height: 16px;
+}
+
+.preview-banner {
+  padding: 10px 14px;
+  border: 1px solid #cdd9f5;
+  border-radius: 8px;
+  background: #eef3fe;
+  color: #2f4a8a;
+  font-size: 13px;
+  font-weight: 700;
+  line-height: 1.45;
+}
+
 .primary-action-controls {
   display: grid;
   justify-items: stretch;

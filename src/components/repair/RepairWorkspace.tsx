@@ -3,6 +3,10 @@ import type { DiagnosisResult, RepairPlan, RepairRoute, RepairRun, WizardPrimary
 
 export function RepairWorkspace(props: {
   route: RepairRoute
+  inputValue: string
+  onInputChange: (value: string) => void
+  codexDesktopClosed: boolean
+  onCodexDesktopClosedChange: (closed: boolean) => void
   diagnosis: DiagnosisResult | null
   plan: RepairPlan | null
   run: RepairRun | null
@@ -10,17 +14,40 @@ export function RepairWorkspace(props: {
   onPrimaryAction: () => void
 }) {
   const ActionIcon = !props.diagnosis ? FileSearch : !props.plan ? Wrench : Play
+  const needsDesktopClosed = props.plan?.riskLevel === 'requires-desktop-closed'
 
   return (
     <section className="repair-workspace">
+      <div className="preview-banner" role="status">
+        {props.primaryAction.previewNotice}
+      </div>
+
       <section className="primary-action-panel" aria-label="下一步操作">
         <div className="route-context">
           <p className="eyebrow">当前任务</p>
           <h2>{props.route.title}</h2>
           <p>{props.route.description}</p>
-          <span>{props.route.primaryInputLabel}</span>
+          <label className="route-input-field">
+            <span>{props.route.primaryInputLabel}</span>
+            <input
+              type="text"
+              value={props.inputValue}
+              placeholder={props.route.inputPlaceholder}
+              onChange={(event) => props.onInputChange(event.target.value)}
+            />
+          </label>
         </div>
         <div className="primary-action-controls">
+          {needsDesktopClosed && (
+            <label className="desktop-closed-toggle">
+              <input
+                type="checkbox"
+                checked={props.codexDesktopClosed}
+                onChange={(event) => props.onCodexDesktopClosedChange(event.target.checked)}
+              />
+              我已关闭 Codex Desktop
+            </label>
+          )}
           <button
             className={`primary-button primary-action-button action-${props.primaryAction.tone}`}
             type="button"
@@ -31,7 +58,6 @@ export function RepairWorkspace(props: {
             {props.primaryAction.label}
           </button>
           {props.primaryAction.disabledReason && <p className="blocked-reason">{props.primaryAction.disabledReason}</p>}
-          <p className="preview-notice">{props.primaryAction.previewNotice}</p>
         </div>
       </section>
 
@@ -39,7 +65,6 @@ export function RepairWorkspace(props: {
         <h3>诊断结果</h3>
         {props.diagnosis ? (
           <div className="result-block">
-            <p className="preview-notice">{props.primaryAction.previewNotice}</p>
             <strong>{props.diagnosis.summary}</strong>
             <ul>
               {props.diagnosis.evidence.map((item) => (
@@ -59,7 +84,6 @@ export function RepairWorkspace(props: {
         <h3>修复计划</h3>
         {props.plan ? (
           <div className="result-block">
-            <p className="preview-notice">{props.primaryAction.previewNotice}</p>
             <strong>{props.plan.summary}</strong>
             <ul>
               {props.plan.writeSet.map((item) => (
@@ -75,7 +99,6 @@ export function RepairWorkspace(props: {
       {props.run && (
         <section className="workspace-section">
           <h3>验证</h3>
-          <p className="preview-notice">{props.primaryAction.previewNotice}</p>
           <ul>
             {props.run.verificationResults.map((item) => (
               <li key={item}>{item}</li>
