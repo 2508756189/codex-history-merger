@@ -11,6 +11,7 @@ export type RepairRoute = {
   title: string
   description: string
   primaryInputLabel: string
+  inputPlaceholder: string
 }
 
 export type RepairStep = {
@@ -60,6 +61,7 @@ export type RepairWizardState = {
   activeRouteId: RepairRouteId
   activeStepId: RepairStepId
   riskLevel: RiskLevel
+  inputValue: string
   diagnosis: DiagnosisResult | null
   plan: RepairPlan | null
   run: RepairRun | null
@@ -81,24 +83,28 @@ export const repairRoutes: RepairRoute[] = [
     title: '找回隐藏历史',
     description: '历史线程还在磁盘上，但没有显示在 Codex Desktop。',
     primaryInputLabel: '线程标题或项目路径',
+    inputPlaceholder: '例如：thread-deploy 或 C:/projects/parking-platform',
   },
   {
     id: 'provider-migration',
     title: '修复 Provider 迁移',
     description: '修正数据库和 rollout 元数据里的 Provider 分组不一致。',
     primaryInputLabel: '源 Provider key 和目标 Provider key',
+    inputPlaceholder: '例如：openai -> custom',
   },
   {
     id: 'project-sidebar',
     title: '恢复项目侧栏',
     description: '项目配置存在，但没有出现在 Codex Desktop 侧栏。',
     primaryInputLabel: '项目根路径',
+    inputPlaceholder: '例如：C:/projects/parking-platform',
   },
   {
     id: 'backup-import',
     title: '导入备份历史',
     description: '扫描外部 .codex 目录，去重后导入到本地合并库。',
     primaryInputLabel: '外部 .codex 路径',
+    inputPlaceholder: '例如：D:/backup/work-laptop/.codex',
   },
 ]
 
@@ -116,6 +122,7 @@ export function createInitialWizardState(): RepairWizardState {
     activeRouteId: 'hidden-history',
     activeStepId: 'diagnosis',
     riskLevel: 'read-only',
+    inputValue: '',
     diagnosis: null,
     plan: null,
     run: null,
@@ -128,6 +135,7 @@ export function selectRoute(state: RepairWizardState, routeId: RepairRouteId): R
     activeRouteId: routeId,
     activeStepId: 'diagnosis',
     riskLevel: 'read-only',
+    inputValue: '',
     diagnosis: null,
     plan: null,
     run: null,

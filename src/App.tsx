@@ -18,15 +18,28 @@ import {
 
 function App() {
   const [state, setState] = useState(createInitialWizardState)
+  const [codexDesktopClosed, setCodexDesktopClosed] = useState(false)
   const activeRoute = useMemo(
     () => repairRoutes.find((route) => route.id === state.activeRouteId) ?? repairRoutes[0],
     [state.activeRouteId],
   )
-  const canExecute = canExecutePlan(state.plan, { codexDesktopClosed: false })
+  const canExecute = canExecutePlan(state.plan, { codexDesktopClosed })
   const primaryAction = getWizardPrimaryAction(state, canExecute)
 
   function handleRouteSelect(routeId: RepairRouteId) {
+    if (routeId === state.activeRouteId) return
+
+    const hasProgress = Boolean(state.diagnosis || state.plan || state.run)
+    if (hasProgress && !window.confirm('切换路线会清空当前诊断和计划进度，确认切换？')) {
+      return
+    }
+
+    setCodexDesktopClosed(false)
     setState((current) => selectRoute(current, routeId))
+  }
+
+  function handleInputChange(value: string) {
+    setState((current) => ({ ...current, inputValue: value }))
   }
 
   function handleDiagnose() {
@@ -52,7 +65,7 @@ function App() {
 
       return {
         ...current,
-        activeStepId: 'plan',
+        activeStepId: 'backup',
         riskLevel: plan.riskLevel,
         plan,
         run: null,
@@ -114,6 +127,10 @@ function App() {
           <WizardStepper steps={repairSteps} activeStepId={state.activeStepId} />
           <RepairWorkspace
             route={activeRoute}
+            inputValue={state.inputValue}
+            onInputChange={handleInputChange}
+            codexDesktopClosed={codexDesktopClosed}
+            onCodexDesktopClosedChange={setCodexDesktopClosed}
             diagnosis={state.diagnosis}
             plan={state.plan}
             run={state.run}
